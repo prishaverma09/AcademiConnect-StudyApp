@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h1 class="fw-bold mb-0">Mind <span class="text-gradient">Relax Hub</span></h1>
+            <p class="text-muted fw-bold">Take a break to recharge your brain. Play solo or challenge the AI!</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Game 1: Tic-Tac-Toe vs AI -->
+        <div class="col-md-6">
+            <div class="glass-box p-4 h-100">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <span class="fs-2">🤖</span>
+                    <div>
+                        <h4 class="fw-bold m-0">Tic-Tac-Toe vs AI</h4>
+                        <p class="small text-muted mb-0 fw-bold">Can you beat the Academi AI?</p>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <div id="status" class="mb-3 fw-bold text-info">Your Turn (X)</div>
+                    <div class="d-grid gap-2 mx-auto" style="grid-template-columns: repeat(3, 80px); width: max-content;">
+                        {% for i in range(9) %}
+                        <button class="btn btn-outline-light border-secondary p-0 fs-3 fw-bold cell" style="height: 80px; width: 80px;" data-index="{{ i }}" onclick="makeMove(this)"></button>
+                        {% endfor %}
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger mt-4 rounded-pill px-4" onclick="resetGame()">Reset Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game 2: Memory Match -->
+        <div class="col-md-6">
+            <div class="glass-box p-4 h-100">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <span class="fs-2">🧠</span>
+                    <div>
+                        <h4 class="fw-bold m-0">Memory Match</h4>
+                        <p class="small text-muted mb-0 fw-bold">Match the pairs to clear your mind.</p>
+                    </div>
+                </div>
+                <div id="memory-game" class="d-flex flex-wrap justify-content-center gap-2">
+                    <!-- Cards injected by JS -->
+                </div>
+                <div class="text-center mt-4">
+                    <button class="btn btn-sm btn-outline-primary rounded-pill px-4" onclick="initMemoryGame()">Start New Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .cell {
+        background: rgba(255,255,255,0.02);
+        transition: all 0.2s;
+    }
+    .cell:hover {
+        background: rgba(255,255,255,0.05);
+    }
+    .memory-card {
+        width: 70px;
+        height: 70px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s;
+    }
+    .memory-card.flipped {
+        background: var(--neon);
+        transform: rotateY(180deg);
+    }
+</style>
+
+<script>
+    // --- Tic Tac Toe Logic ---
+    let board = Array(9).fill(null);
+    let gameActive = true;
+
+    function makeMove(cell) {
+        const index = cell.dataset.index;
+        if (board[index] || !gameActive) return;
+
+        board[index] = 'X';
+        cell.innerText = 'X';
+        cell.classList.add('text-primary');
+
+        if (checkWin('X')) {
+            document.getElementById('status').innerText = '🎉 You Won!';
+            gameActive = false;
+            return;
+        }
+
+        if (!board.includes(null)) {
+            document.getElementById('status').innerText = "🤝 It's a Draw!";
+            gameActive = false;
+            return;
+        }
+
+        document.getElementById('status').innerText = '🤖 AI is thinking...';
+        setTimeout(aiMove, 500);
+    }
+
+    function aiMove() {
+        if (!gameActive) return;
+        let available = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
+        let move = available[Math.floor(Math.random() * available.length)];
+        
+        board[move] = 'O';
+        const cell = document.querySelector(`[data-index="${move}"]`);
+        cell.innerText = 'O';
+        cell.classList.add('text-danger');
+
+        if (checkWin('O')) {
+            document.getElementById('status').innerText = '💀 AI Won!';
+            gameActive = false;
+            return;
+        }
+        document.getElementById('status').innerText = 'Your Turn (X)';
+    }
+
+    function checkWin(player) {
+        const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        return wins.some(w => w.every(i => board[i] === player));
+    }
+
+    function resetGame() {
+        board = Array(9).fill(null);
+        gameActive = true;
+        document.querySelectorAll('.cell').forEach(c => {
+            c.innerText = '';
+            c.classList.remove('text-primary', 'text-danger');
+        });
+        document.getElementById('status').innerText = 'Your Turn (X)';
+    }
+
+    // --- Memory Game Logic ---
+    const emojis = ['🚀', '🍕', '🐱', '🌈', '💎', '🎨', '🎸', '🍦'];
+    let flippedCards = [];
+    let matchedCount = 0;
+
+    function initMemoryGame() {
+        const gameDiv = document.getElementById('memory-game');
+        gameDiv.innerHTML = '';
+        flippedCards = [];
+        matchedCount = 0;
+        
+        const deck = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+        deck.forEach((emoji, i) => {
+            const card = document.createElement('div');
+            card.className = 'memory-card';
+            card.dataset.emoji = emoji;
+            card.onclick = () => flipCard(card);
+            gameDiv.appendChild(card);
+        });
+    }
+
+    function flipCard(card) {
+        if (flippedCards.length === 2 || card.classList.contains('flipped')) return;
+        
+        card.classList.add('flipped');
+        card.innerText = card.dataset.emoji;
+        flippedCards.push(card);
+
+        if (flippedCards.length === 2) {
+            if (flippedCards[0].dataset.emoji === flippedCards[1].dataset.emoji) {
+                matchedCount += 2;
+                flippedCards = [];
+                if (matchedCount === emojis.length * 2) alert('Brain Recharged! 🎉');
+            } else {
+                setTimeout(() => {
+                    flippedCards.forEach(c => {
+                        c.classList.remove('flipped');
+                        c.innerText = '';
+                    });
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+    }
+
+    window.onload = initMemoryGame;
+</script>
+{% endblock %}
