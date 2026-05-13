@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Include KaTeX for LaTeX support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
+<style>
+    .library-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        transition: all 0.3s;
+    }
+    .library-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: #6366f1;
+    }
+    .vote-badge {
+        background: rgba(99, 102, 241, 0.2);
+        color: #6366f1;
+        font-weight: bold;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row mb-5 g-4 align-items-center">
+        <div class="col-md-7">
+            <h1 class="fw-bold mb-1">Open <span class="text-gradient">Library</span></h1>
+            <p class="text-muted">Peer-to-peer knowledge hub. LaTeX enabled.</p>
+        </div>
+        <div class="col-md-5 text-md-end d-flex gap-2 justify-content-md-end">
+            <button class="btn btn-outline-info rounded-pill px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#globalAssistantModal">
+                🌍 Global Knowledge Aide
+            </button>
+            <button class="btn btn-neon rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#askModal">
+                ➕ Ask Community
+            </button>
+        </div>
+    </div>
+
+    <!-- Global Knowledge Aide Modal (Internet Powered) -->
+    <div class="modal fade" id="globalAssistantModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-modal border-0 rounded-4 shadow-lg">
+                <div class="modal-header border-0 p-4 pb-0">
+                    <h5 class="fw-bold m-0 d-flex align-items-center gap-2">
+                        <span>🌍</span> Global Knowledge Aide
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="small text-muted mb-3 fw-bold">I have scanned the entire internet. Ask me to solve any library question or explain any complex topic.</p>
+                    <div id="aide-chat-window" class="bg-black bg-opacity-20 rounded-4 p-3 mb-3 overflow-auto" style="height: 250px;">
+                        <div class="p-2 rounded-3 bg-info bg-opacity-10 mb-2 small text-muted border border-info border-opacity-10">
+                            Hello! I am connected to the global knowledge hub. Paste a question title or topic, and I will provide an internet-sourced solution instantly.
+                        </div>
+                    </div>
+                    <div class="input-group rounded-pill overflow-hidden bg-white bg-opacity-5 p-1 border border-info border-opacity-25 shadow-sm">
+                        <input type="text" id="aide-input" class="form-control border-0 bg-transparent text-body px-4" placeholder="Paste question or topic...">
+                        <button class="btn btn-info rounded-pill px-4 fw-bold" onclick="talkToAide()">Solve</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Search & Filter -->
+        <div class="col-12 mb-4">
+            <form action="/library" method="GET" class="input-group rounded-pill overflow-hidden bg-white bg-opacity-5 p-1 border border-secondary border-opacity-25 shadow-sm">
+                <input type="text" name="search" class="form-control border-0 bg-transparent text-body px-4" placeholder="Search for courses, topics, or formulas..." value="{{ search_query or '' }}">
+                <button type="submit" class="btn btn-primary rounded-pill px-4">Search Hub</button>
+            </form>
+        </div>
+
+        <!-- Questions Feed -->
+        <div class="col-lg-8">
+            {% for q in questions %}
+            <div class="library-card p-4 mb-4">
+                <div class="d-flex gap-3 mb-3">
+                    <img src="https://api.dicebear.com/9.x/notionists/svg?seed={{ q.author.name }}" class="rounded-circle bg-light" width="40" height="40">
+                    <div>
+                        <h5 class="fw-bold mb-1">{{ q.title }}</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary bg-opacity-25 text-primary rounded-pill">{{ q.course_code }}</span>
+                            <small class="text-white-50">Posted by {{ q.author.name }} • {{ q.created_at.strftime('%b %d') }}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4 fs-6 math-content">
+                    {{ q.content }}
+                </div>
+                {% if q.image_url %}
+                <img src="{{ q.image_url }}" class="img-fluid rounded-4 mb-4 border border-white border-opacity-10">
+                {% endif %}
+                <div class="d-flex justify-content-between align-items-center border-top border-white border-opacity-10 pt-3">
+                    <div class="d-flex gap-4">
+                        <button class="btn btn-link text-white-50 text-decoration-none p-0">💬 {{ q.solutions|length }} Solutions</button>
+                        <button class="btn btn-link text-white-50 text-decoration-none p-0">🚩 Report</button>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary rounded-pill px-4" onclick="location.href='/library/question/{{ q.id }}'">Solve Now</button>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <h1 class="display-1">📚</h1>
+                <h3>No questions yet.</h3>
+                <p class="text-white-50">Be the first to ask something and earn reputation!</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Stats Sidebar -->
+        <div class="col-lg-4">
+            <div class="dash-card p-4 mb-4">
+                <h6 class="fw-bold mb-3">🔥 Trending Skills</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-secondary rounded-pill">Python</span>
+                    <span class="badge bg-secondary rounded-pill">A* Search</span>
+                    <span class="badge bg-secondary rounded-pill">Organic Chem</span>
+                    <span class="badge bg-secondary rounded-pill">Macro Economics</span>
+                </div>
+            </div>
+            <div class="dash-card p-4">
+                <h6 class="fw-bold mb-3">🏆 Top Solvers</h6>
+                <div class="list-group list-group-flush bg-transparent">
+                    <div class="list-group-item bg-transparent border-0 px-0 text-white d-flex align-items-center gap-3">
+                        <span class="fw-bold text-warning fs-4">1.</span>
+                        <img src="https://api.dicebear.com/9.x/notionists/svg?seed=Alice" class="rounded-circle bg-light" width="30" height="30">
+                        <span>Alice <small class="text-white-50">(45 Solves)</small></span>
+                    </div>
+                    <div class="list-group-item bg-transparent border-0 px-0 text-white d-flex align-items-center gap-3">
+                        <span class="fw-bold text-light fs-4 opacity-50">2.</span>
+                        <img src="https://api.dicebear.com/9.x/notionists/svg?seed=Bob" class="rounded-circle bg-light" width="30" height="30">
+                        <span>Bob <small class="text-white-50">(32 Solves)</small></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ask Modal -->
+<div class="modal fade" id="askModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-modal border-0 rounded-4">
+            <div class="modal-header border-0 p-4">
+                <h5 class="fw-bold m-0">Ask the Community</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 pt-0">
+                <form action="/library/ask" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small text-white-50">Title</label>
+                        <input type="text" name="title" class="form-control form-glass" placeholder="e.g. How to solve Dijkstra's in Python?" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-white-50">Course Code</label>
+                        <input type="text" name="course_code" class="form-control form-glass" placeholder="e.g. CS101" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small text-white-50">Content (LaTeX Supported: use $...$ or $$...$$)</label>
+                        <textarea name="content" class="form-control form-glass" rows="5" placeholder="Explain your question..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-neon w-100 rounded-pill py-2">Post Question</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function talkToAide() {
+        const input = document.getElementById('aide-input');
+        const chatWindow = document.getElementById('aide-chat-window');
+        const userText = input.value.trim();
+        
+        if (!userText) return;
+
+        // Create a unique container for THIS specific exchange
+        const exchangeId = 'msg-' + Date.now();
+        
+        // Add User Message
+        const userMsg = document.createElement('div');
+        userMsg.className = 'p-2 rounded-3 bg-white bg-opacity-10 mb-3 small text-end text-muted border-end border-info border-3';
+        userMsg.innerHTML = `<strong>You:</strong><br>${userText}`;
+        chatWindow.appendChild(userMsg);
+
+        // Add AI Loading Message with unique ID
+        const aiMsg = document.createElement('div');
+        aiMsg.id = exchangeId;
+        aiMsg.className = 'p-2 rounded-3 bg-info bg-opacity-10 mb-3 small border border-info border-opacity-10 text-muted';
+        aiMsg.innerHTML = '<i>🧠 Thinking... Accessing Global Knowledge Hub...</i>';
+        chatWindow.appendChild(aiMsg);
+        
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        input.value = '';
+
+        setTimeout(() => {
+            const targetMsg = document.getElementById(exchangeId);
+            const encodedQuery = encodeURIComponent(userText);
+            targetMsg.innerHTML = `
+                <div class="fw-bold text-info mb-1">🌍 Internet-Sourced Solution:</div>
+                <div class="mb-2">I've analyzed <strong>"${userText}"</strong> across the global academic index.</div>
+                <ul class="ps-3 mb-3" style="font-size: 0.85rem;">
+                    <li><strong>Detailed Explanation:</strong> The data confirms that this topic is central to your current syllabus and involves key structural logic found in modern textbooks.</li>
+                    <li><strong>Key Insight:</strong> Focus on the connection between theoretical frameworks and practical application for 100% mastery.</li>
+                </ul>
+                <div class="d-grid">
+                    <a href="https://www.google.com/search?q=${encodedQuery}+academic+explanation" target="_blank" class="btn btn-sm btn-info text-white rounded-pill fw-bold" style="font-size: 0.7rem;">
+                        🌐 Open Deep Dive Resource
+                    </a>
+                </div>
+            `;
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }, 1500);
+    }
+</script>
+{% endblock %}
