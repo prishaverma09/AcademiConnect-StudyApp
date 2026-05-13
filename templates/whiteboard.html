@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    #whiteboard-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        overflow: hidden;
+    }
+    #whiteboard {
+        background: #f8fafc;
+        cursor: crosshair;
+        touch-action: none;
+    }
+    .toolbar {
+        background: rgba(0,0,0,0.3);
+        padding: 15px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .color-btn {
+        width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor: pointer;
+    }
+    .color-btn.active { border-color: white; }
+</style>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-0">Collaborative <span class="text-gradient">Whiteboard</span></h1>
+            <p class="text-white-50">Visual collaboration in real-time.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-light rounded-pill px-4" onclick="clearCanvas()">Clear</button>
+            <button class="btn btn-primary rounded-pill px-4" onclick="downloadCanvas()">Export PDF</button>
+        </div>
+    </div>
+
+    <div id="whiteboard-container">
+        <canvas id="whiteboard" width="1200" height="600" class="w-100"></canvas>
+        <div class="toolbar d-flex justify-content-between align-items-center">
+            <div class="d-flex gap-3 align-items-center">
+                <span class="small fw-bold">Tools:</span>
+                <div class="color-btn active" style="background: #000;" onclick="setColor('#000', this)"></div>
+                <div class="color-btn" style="background: #ef4444;" onclick="setColor('#ef4444', this)"></div>
+                <div class="color-btn" style="background: #3b82f6;" onclick="setColor('#3b82f6', this)"></div>
+                <div class="color-btn" style="background: #10b981;" onclick="setColor('#10b981', this)"></div>
+                <input type="range" class="form-range" id="brushSize" min="1" max="20" value="5" style="width: 100px;">
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success">● Live</span>
+                <small class="text-white-50">Sharing with Alice</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('whiteboard');
+    const ctx = canvas.getContext('2d');
+    let painting = false;
+    let color = '#000';
+    let size = 5;
+
+    function startPosition(e) {
+        painting = true;
+        draw(e);
+    }
+
+    function finishedPosition() {
+        painting = false;
+        ctx.beginPath();
+    }
+
+    function draw(e) {
+        if (!painting) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+        ctx.lineWidth = document.getElementById('brushSize').value;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = color;
+
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        
+        // In a real app, emit(x, y, color, size) via SocketIO here
+    }
+
+    canvas.addEventListener('mousedown', startPosition);
+    canvas.addEventListener('mouseup', finishedPosition);
+    canvas.addEventListener('mousemove', draw);
+    
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startPosition(e); });
+    canvas.addEventListener('touchend', finishedPosition);
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+
+    function setColor(newColor, btn) {
+        color = newColor;
+        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function downloadCanvas() {
+        const link = document.createElement('a');
+        link.download = 'whiteboard-session.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+</script>
+{% endblock %}
