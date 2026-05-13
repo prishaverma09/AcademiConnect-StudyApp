@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Include KaTeX for LaTeX support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/library" class="text-primary text-decoration-none">Library</a></li>
+            <li class="breadcrumb-item active text-muted" aria-current="page">Question Details</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <!-- Question Section -->
+        <div class="col-lg-8">
+            <div class="glass-box p-5 mb-5 border-0">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <img src="https://api.dicebear.com/9.x/notionists/svg?seed={{ question.author.name }}" class="rounded-circle bg-light" width="50" height="50">
+                    <div>
+                        <h2 class="fw-bold mb-0">{{ question.title }}</h2>
+                        <span class="badge bg-primary bg-opacity-25 text-primary rounded-pill">{{ question.course_code }}</span>
+                        <small class="text-muted ms-2">Asked by {{ question.author.name }} • {{ question.created_at.strftime('%B %d, %Y') }}</small>
+                    </div>
+                </div>
+                <div class="glass-box p-4 mb-5 border-primary border-opacity-25" style="background: rgba(99, 102, 241, 0.05);">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="fs-4">🤖</span>
+                    <h5 class="fw-bold m-0 text-gradient">AI Instant Solution</h5>
+                    <span class="badge bg-primary ms-auto">24/7 Support</span>
+                </div>
+                <p class="text-muted mb-3 small">Need a quick explanation? Our AI Mentor can analyze this question and provide a detailed solution with LaTeX support.</p>
+                <button class="btn btn-neon btn-sm rounded-pill px-4" onclick="askAIForQuestion('{{ question.id }}')">✨ Generate AI Solution</button>
+                <div id="ai-solution-container-{{ question.id }}" class="mt-3 p-3 rounded-4 bg-black bg-opacity-20 d-none">
+                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                    <span class="small text-white-50">AI is thinking...</span>
+                </div>
+            </div>
+
+            <h4 class="fw-bold mb-4 d-flex align-items-center gap-2">
+                <span>💬</span> {{ question.solutions|length }} Solutions
+            </h4>
+                <div class="fs-5 mb-4 math-content">
+                    {{ question.content }}
+                </div>
+                {% if question.image_url %}
+                <img src="{{ question.image_url }}" class="img-fluid rounded-4 mb-4">
+                {% endif %}
+            </div>
+
+            <!-- Solutions Section -->
+            <h3 class="fw-bold mb-4">Solutions ({{ question.solutions|length }})</h3>
+            
+            {% for solution in question.solutions %}
+            <div class="glass-box p-4 mb-4 border-0">
+                <div class="d-flex gap-3">
+                    <div class="text-center" style="min-width: 50px;">
+                        <button class="btn btn-link text-muted p-0 fs-4 d-block mx-auto vote-btn" data-id="{{ solution.id }}" data-type="up">🔼</button>
+                        <span class="fw-bold fs-5 d-block my-1" id="votes-{{ solution.id }}">{{ solution.upvotes - solution.downvotes }}</span>
+                        <button class="btn btn-link text-muted p-0 fs-4 d-block mx-auto vote-btn" data-id="{{ solution.id }}" data-type="down">🔽</button>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <img src="https://api.dicebear.com/9.x/notionists/svg?seed={{ solution.user_id }}" class="rounded-circle bg-light" width="30" height="30">
+                            <span class="small fw-bold">User #{{ solution.user_id }}</span>
+                            <small class="text-muted">• {{ solution.created_at.strftime('%H:%M') }}</small>
+                        </div>
+                        <div class="math-content">
+                            {{ solution.content }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="p-5 text-center bg-black bg-opacity-20 rounded-4 mb-5">
+                <p class="text-muted mb-0">No solutions yet. Be the first to help!</p>
+            </div>
+            {% endfor %}
+
+            <!-- Post a Solution -->
+            <div class="glass-box p-4 border-primary" style="border-width: 1px !important;">
+                <h5 class="fw-bold mb-3">Post Your Solution</h5>
+                <form action="/library/question/{{ question.id }}/solve" method="POST">
+                    <textarea name="content" class="form-control form-glass mb-3" rows="4" placeholder="Type your solution here (LaTeX supported)..." required></textarea>
+                    <button type="submit" class="btn btn-neon rounded-pill px-4 fw-bold">Submit Solution</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="glass-box p-4">
+                <h6 class="fw-bold mb-3">Tips for Solutions</h6>
+                <ul class="small text-muted ps-3">
+                    <li class="mb-2">Use **Markdown** for formatting.</li>
+                    <li class="mb-2">Use $...$ for inline math and $$...$$ for blocks.</li>
+                    <li class="mb-2">Be kind and helpful!</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Event listener for vote buttons to avoid inline JS linter errors
+    document.querySelectorAll('.vote-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const solutionId = this.getAttribute('data-id');
+            const type = this.getAttribute('data-type');
+            vote(solutionId, type);
+        });
+    });
+
+    async function vote(solutionId, type) {
+        // In a real app, send a POST request to /vote
+        alert('Voted ' + type + ' on solution #' + solutionId);
+        // UI update placeholder
+        const count = document.getElementById('votes-' + solutionId);
+        count.innerText = parseInt(count.innerText) + (type === 'up' ? 1 : -1);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+
+    async function askAIForQuestion(questionId) {
+        const container = document.getElementById('ai-solution-container-' + questionId);
+        container.classList.remove('d-none');
+        
+        // Mocking AI response for the demo
+        setTimeout(() => {
+            container.innerHTML = `
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-success">AI Verified</span>
+                    <small class="text-white-50">Response generated in 1.2s</small>
+                </div>
+                <div class="text-white small">
+                    Based on the context of this question, the solution involves applying the fundamental theorem of calculus. 
+                    $\\int_{a}^{b} f(x)dx = F(b) - F(a)$. 
+                    I recommend checking the related notes in the Repository under course CS101 for a step-by-step breakdown!
+                </div>
+            `;
+            // Re-render math if KaTeX is available
+            if (typeof renderMathInElement === "function") {
+                renderMathInElement(container);
+            }
+        }, 1500);
+    }
+</script>
+{% endblock %}
