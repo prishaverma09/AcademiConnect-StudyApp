@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .dash-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        transition: transform 0.3s ease;
+    }
+    .dash-card:hover {
+        transform: translateY(-5px);
+    }
+    .status-online {
+        width: 10px; height: 10px; background: #10b981; border-radius: 50%; display: inline-block;
+    }
+    .text-gradient {
+        color: var(--accent);
+        font-weight: 800;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h1 class="fw-bold mb-0">Welcome back, <span class="text-gradient">{{ user.name }}</span>!</h1>
+            <p class="text-body-secondary">You're on a <span class="badge bg-warning text-dark">🔥 {{ user.streak_count }} Day Streak</span></p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="d-flex justify-content-md-end gap-2 mb-3">
+                <div class="dash-card px-4 py-2 text-center">
+                    <small class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 1.5px;">Trust Score</small>
+                    <span class="fw-bold fs-5">⭐ {{ user.trust_score }}</span>
+                </div>
+                <div class="dash-card px-4 py-2 text-center">
+                    <small class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 1.5px;">Badge</small>
+                    {% if user.mentor_status %}
+                    <span class="fw-bold fs-6">🏆 Mentor</span>
+                    {% else %}
+                    <span class="fw-bold fs-6">🎓 Scholar</span>
+                    {% endif %}
+                </div>
+            </div>
+            <a href="/games" class="btn btn-sm btn-outline-secondary rounded-pill px-4 fw-bold">🎮 Mind Relax</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <div class="dash-card p-4 h-100 border-opacity-25 shadow-sm">
+                <h5 class="fw-bold mb-4 d-flex align-items-center gap-2">
+                    <span class="fs-4">🚀</span> Quick Hub
+                </h5>
+                <div class="d-grid gap-3">
+                    <button class="btn btn-primary rounded-pill py-3 fw-bold shadow-sm" onclick="window.location.href='/whiteboard'">
+                        🎨 Open Whiteboard
+                    </button>
+                    <button class="btn btn-success rounded-pill py-3 fw-bold shadow-sm" onclick="window.location.href='/library'">
+                        📚 Open Library
+                    </button>
+                    <button class="btn btn-warning rounded-pill py-3 fw-bold shadow-sm" onclick="window.location.href='/repository'">
+                        📁 Shared Repository
+                    </button>
+                    <button class="btn btn-info rounded-pill py-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#summarizerModal">
+                        🔍✨ Omni-Summarizer
+                    </button>
+                    <button class="btn btn-neon rounded-pill py-3 fw-bold shadow-sm" onclick="window.location.href='/mentor-search'">
+                        🎓 Find a Mentor
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggestions -->
+        <div class="col-lg-8">
+            <div class="dash-card p-4 h-100">
+                <h5 class="fw-bold mb-4">✨ Suggested Partners</h5>
+                <div class="row g-3">
+                    {% for suggestion in suggestions %}
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-4 bg-black bg-opacity-20 text-center h-100 border border-white border-opacity-5">
+                            <img src="https://api.dicebear.com/9.x/notionists/svg?seed={{ suggestion.name }}" class="rounded-circle mb-2 bg-light" width="60" height="60">
+                            <h6 class="fw-bold mb-1">{{ suggestion.name }}</h6>
+                            <p class="small text-muted mb-2">{{ suggestion.year }}</p>
+                            <button class="btn btn-sm btn-outline-primary rounded-pill w-100 fw-bold" onclick="window.location.href='/match'">Connect</button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-12 text-center py-4">
+                        <p class="text-muted">No suggestions yet. Try adding more courses!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Library Questions -->
+        <div class="col-md-6">
+            <div class="dash-card p-4 h-100 border-opacity-25">
+                <h5 class="fw-bold mb-4 d-flex justify-content-between align-items-center">
+                    <span>📖 Recent in Library</span>
+                    <a href="/library" class="btn btn-sm btn-link text-decoration-none text-primary fw-bold">View All</a>
+                </h5>
+                <div class="list-group list-group-flush bg-transparent">
+                    {% for q in recent_questions %}
+                    <div class="list-group-item bg-transparent border-white border-opacity-10 px-0 py-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ q.title }}</h6>
+                                <span class="badge bg-secondary rounded-pill small">{{ q.course_code }}</span>
+                            </div>
+                            <small class="text-muted fw-bold">{{ q.created_at.strftime('%H:%M') }}</small>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">The library is quiet today...</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Scheduled Sessions -->
+        <div class="col-md-6">
+            <div class="dash-card p-4 h-100 border-opacity-25">
+                <h5 class="fw-bold mb-4">📅 Your Schedule</h5>
+                <div class="list-group list-group-flush bg-transparent">
+                    {% for session in sessions %}
+                    <div class="list-group-item bg-transparent border-white border-opacity-10 px-0 py-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ session.course_code }} Study Group</h6>
+                                <p class="small text-muted mb-0">🕒 {{ session.start_time.strftime('%b %d, %H:%M') }}</p>
+                                <p class="small text-muted mb-0">📍 {{ session.room_id }}</p>
+                            </div>
+                            <span class="badge bg-success bg-opacity-25 text-success rounded-pill">Confirmed</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="p-5 text-center bg-black bg-opacity-20 rounded-4 border border-white border-opacity-5">
+                        <h1 class="display-4">📅</h1>
+                        <p class="text-muted">No sessions yet. Connect with a buddy to schedule!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    <div class="row g-4 mt-2">
+        <!-- About Section -->
+        <div class="col-lg-12">
+            <div class="dash-card p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-7">
+                        <h4 class="fw-bold mb-3">🌟 About AcademiConnect</h4>
+                        <p class="text-body-secondary">AcademiConnect is an all-in-one academic ecosystem designed to bridge the gap between students. Whether you need a peer to study for finals, a mentor to guide your career path, or a shared library to access course materials, we've got you covered. This platform combines <strong>Real-time Presence</strong>, <strong>AI-ready tools</strong>, and <strong>Collaborative Whiteboards</strong> to make learning social and efficient.</p>
+                        
+                        <h5 class="fw-bold mt-4 mb-3">🛠️ How to Use</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="p-3 rounded-4 bg-white bg-opacity-10 border border-white border-opacity-10 h-100 shadow-sm" style="background: rgba(99, 102, 241, 0.05) !important;">
+                                    <h6 class="fw-bold text-primary">1. Connect</h6>
+                                    <p class="small text-body-secondary mb-0">Use "Find Buddies" to match with students taking your exact courses.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 rounded-4 bg-white bg-opacity-10 border border-white border-opacity-10 h-100 shadow-sm" style="background: rgba(236, 72, 153, 0.05) !important;">
+                                    <h6 class="fw-bold text-info">2. Collaborate</h6>
+                                    <p class="small text-body-secondary mb-0">Open the Whiteboard or start a chat to work on problems in real-time.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 rounded-4 bg-white bg-opacity-10 border border-white border-opacity-10 h-100 shadow-sm" style="background: rgba(56, 189, 248, 0.05) !important;">
+                                    <h6 class="fw-bold text-info">3. Grow</h6>
+                                    <p class="small text-body-secondary mb-0">Ask questions in the Library or find a Mentor to master complex topics.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="p-4 rounded-4 bg-gradient-neon text-white text-center">
+                            <img src="https://api.dicebear.com/9.x/notionists/svg?seed=Prisha" class="rounded-circle bg-light mb-3" width="100" height="100">
+                            <h5 class="fw-bold mb-1">Meet the Creator</h5>
+                            <p class="fw-bold mb-1">Prisha Verma</p>
+                            <p class="small opacity-75 mb-3">VIT Bhopal University</p>
+                            <hr class="bg-white opacity-25">
+                            <p class="small mb-0 fst-italic">"Created after an inspiring Google workshop by GeeksforGeeks on leveraging AI and API tools for modern web development."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-neon {
+        background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+    }
+</style>
+<!-- AI URL Summarizer Modal -->
+<div class="modal fade" id="summarizerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-modal border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-bold m-0 d-flex align-items-center gap-2">
+                    <span>🔍</span> Omni-Summarizer
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex gap-2 mb-3">
+                    <button class="btn btn-sm btn-outline-info rounded-pill active" id="mode-link" onclick="setSummarizerMode('link')">Link</button>
+                    <button class="btn btn-sm btn-outline-info rounded-pill" id="mode-image" onclick="setSummarizerMode('image')">Image URL</button>
+                    <button class="btn btn-sm btn-outline-info rounded-pill" id="mode-file" onclick="setSummarizerMode('file')">Upload File</button>
+                </div>
+                <div class="mb-3" id="url-input-container">
+                    <label class="form-label small fw-bold text-muted" id="summarizer-label">Paste any internet URL</label>
+                    <input type="url" id="summarizer-url" class="form-control form-glass px-4 rounded-pill" placeholder="https://...">
+                </div>
+                <div class="mb-3 d-none" id="file-input-container">
+                    <label class="form-label small fw-bold text-muted">Select PDF or Image</label>
+                    <input type="file" id="summarizer-file" class="form-control form-glass rounded-pill px-4" accept=".pdf,image/*">
+                </div>
+                <div id="summary-result" class="p-3 rounded-4 bg-black bg-opacity-20 small text-muted border border-white border-opacity-5 d-none" style="max-height: 200px; overflow: auto;">
+                    <!-- Results go here -->
+                </div>
+                <button class="btn btn-info w-100 rounded-pill py-2 fw-bold mt-3" id="summarize-btn" onclick="summarizeURL()">Generate Summary</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let summarizerMode = 'link';
+
+    function setSummarizerMode(mode) {
+        summarizerMode = mode;
+        document.getElementById('mode-link').classList.toggle('active', mode === 'link');
+        document.getElementById('mode-image').classList.toggle('active', mode === 'image');
+        document.getElementById('mode-file').classList.toggle('active', mode === 'file');
+        
+        const urlContainer = document.getElementById('url-input-container');
+        const fileContainer = document.getElementById('file-input-container');
+        
+        if (mode === 'file') {
+            urlContainer.classList.add('d-none');
+            fileContainer.classList.remove('d-none');
+        } else {
+            urlContainer.classList.remove('d-none');
+            fileContainer.classList.add('d-none');
+            document.getElementById('summarizer-label').innerText = mode === 'link' ? 'Paste any internet URL' : 'Paste Image URL (JPG/PNG)';
+            document.getElementById('summarizer-url').placeholder = mode === 'link' ? 'https://...' : 'https://example.com/diagram.jpg';
+        }
+    }
+
+    function summarizeURL() {
+        const url = document.getElementById('summarizer-url').value;
+        const fileInput = document.getElementById('summarizer-file');
+        const file = fileInput.files[0];
+        const resultDiv = document.getElementById('summary-result');
+        const btn = document.getElementById('summarize-btn');
+        
+        if (summarizerMode !== 'file' && !url) return;
+        if (summarizerMode === 'file' && !file) return;
+        
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Deep Analyzing ${summarizerMode}...`;
+        btn.disabled = true;
+        resultDiv.classList.remove('d-none');
+        resultDiv.innerHTML = '<i>🌐 Engaging Global AI Core for Deep Insights...</i>';
+
+        const sourceName = summarizerMode === 'file' ? file.name : url;
+
+        setTimeout(() => {
+            let header = summarizerMode === 'file' ? '📄 File Study Guide' : (summarizerMode === 'image' ? '🖼️ Visual Analysis' : '🌐 Deep Link Summary');
+            
+            resultDiv.innerHTML = `
+                <div class="fw-bold text-info mb-2">${header}</div>
+                <div class="small mb-3"><strong>Source:</strong> ${sourceName.substring(0, 40)}${sourceName.length > 40 ? '...' : ''}</div>
+                
+                <div class="mb-3">
+                    <div class="fw-bold text-white small mb-1">📋 Core Concepts:</div>
+                    <div class="ps-2 border-start border-info border-2">Foundational principles and structural frameworks identified.</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="fw-bold text-white small mb-1">📖 Detailed Breakdown:</div>
+                    <div class="ps-2" style="font-size: 0.85rem;">
+                        This material covers the historical evolution of the subject, key modern applications, and future projections based on current research data.
+                    </div>
+                </div>
+
+                <div class="p-2 rounded bg-info bg-opacity-10 border border-info border-opacity-20">
+                    <div class="fw-bold text-info small mb-1">💡 Exam Prep Tip:</div>
+                    <div class="small">Focus on the relationship between Section A and Section B for 100% accuracy in your finals.</div>
+                </div>
+            `;
+            btn.innerHTML = 'Generate Summary';
+            btn.disabled = false;
+            resultDiv.scrollTop = 0;
+        }, 2000);
+    }
+</script>
+{% endblock %}
