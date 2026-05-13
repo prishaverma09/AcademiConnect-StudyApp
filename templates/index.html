@@ -1,0 +1,399 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Gen Z Glassmorphism specific to Index Page */
+    .hero-section {
+        padding: 100px 0;
+    }
+    
+    .glass-box {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        color: white;
+    }
+    
+    .text-gradient {
+        background: -webkit-linear-gradient(#6366f1, #ec4899);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .btn-neon-outline {
+        background: transparent;
+        color: white;
+        border: 2px solid #6366f1;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    .btn-neon-outline:hover {
+        background: #6366f1;
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+    }
+
+    .step-number {
+        width: 70px; 
+        height: 70px; 
+        font-size: 28px; 
+        font-weight: 800;
+        background: linear-gradient(135deg, #6366f1, #ec4899);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto 20px auto;
+        box-shadow: 0 10px 20px rgba(236, 72, 153, 0.3);
+    }
+
+    .form-glass {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+    .form-glass:focus {
+        background: rgba(0, 0, 0, 0.3);
+        border-color: #ec4899;
+        color: white;
+        box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+    }
+    .form-glass option {
+        background: #0f172a;
+        color: white;
+    }
+    
+    /* Customizing the modal for dark theme */
+    .modal-content.glass-modal {
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(25px);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: white;
+    }
+    .modal-header.glass-header {
+        background: rgba(255,255,255,0.05);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .chat-area {
+        background: rgba(0,0,0,0.2);
+    }
+    .schedule-area {
+        background: rgba(255,255,255,0.02);
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <span class="badge bg-dark border border-secondary text-light px-3 py-2 rounded-pill mb-3 fw-bold" style="letter-spacing: 1px;">STUDY VIBES ONLY 🚀</span>
+                <h1 class="display-4 fw-bolder mb-4" style="line-height: 1.2;">
+                    Find Your Perfect <br><span class="text-gradient">Study Buddy.</span>
+                </h1>
+                <p class="lead text-body-secondary mb-4" style="font-size: 1.15rem;">
+                    Match with classmates based on courses and study energy. Built for the modern student who values connection and community.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="#how-to" class="btn btn-neon btn-lg px-4 rounded-pill fw-bold">Get Started</a>
+                    <a href="#about" class="btn btn-neon-outline btn-lg px-4 rounded-pill fw-bold">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <!-- 3D style floating card -->
+                <div class="glass-box p-5 position-relative overflow-hidden mx-auto" style="min-height: 350px; display:flex; flex-direction:column; justify-content:center; max-width: 400px; transform: perspective(1000px) rotateY(-10deg) rotateX(5deg);">
+                    <h2 class="display-1 fw-bold text-white mb-0" style="filter: drop-shadow(0 0 20px rgba(236,72,153,0.5));">🎧</h2>
+                    <h3 class="text-white mt-4 fw-bold">Succeed Together</h3>
+                    <p class="text-body-secondary">#StudyTok #Connection</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- About Us Section -->
+    <div id="about" class="glass-box p-5 mb-5 text-center">
+        <h2 class="fw-bolder mb-3">About Us</h2>
+        <div class="mx-auto rounded mb-4" style="width: 60px; height: 4px; background: linear-gradient(90deg, #6366f1, #ec4899);"></div>
+        <div class="row justify-content-center">
+            <div class="col-md-9 fs-5 text-body-secondary" style="line-height: 1.7;">
+                <p class="mb-4">
+                    <strong class="text-white fs-4 d-block mb-2">Our Mission:</strong> 
+                    <span class="text-gradient fw-bold">"Matching vibes and syllabuses to help you crush finals together."</span>
+                </p>
+                <p>
+                    AcademiConnect is built for students who are serious about their studies but refuse to compromise on connection. We match you based on course overlap and learning preferences while protecting your privacy with our built-in Ghost Mode.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- How to Use Section -->
+    <div id="how-to" class="mb-5 py-4 text-center">
+        <h2 class="fw-bolder mb-3">How it Works</h2>
+        <div class="mx-auto rounded mb-5" style="width: 60px; height: 4px; background: linear-gradient(90deg, #6366f1, #ec4899);"></div>
+        
+        <div class="row g-4">
+            <!-- Step 1 -->
+            <div class="col-md-4">
+                <div class="glass-box p-4 h-100">
+                    <div class="step-number">1</div>
+                    <h4 class="fw-bold mb-3">Input Classes</h4>
+                    <p class="text-body-secondary mb-0">Drop your course codes (e.g., CS101) to find people sharing your exact syllabus and pain.</p>
+                </div>
+            </div>
+            <!-- Step 2 -->
+            <div class="col-md-4">
+                <div class="glass-box p-4 h-100">
+                    <div class="step-number">2</div>
+                    <h4 class="fw-bold mb-3">Set The Vibe</h4>
+                    <p class="text-body-secondary mb-0">Choose your energy. Are we talking "Lo-Fi Beats at 2AM" or "Loud Cafe chatter"?</p>
+                </div>
+            </div>
+            <!-- Step 3 -->
+            <div class="col-md-4">
+                <div class="glass-box p-4 h-100">
+                    <div class="step-number">3</div>
+                    <h4 class="fw-bold mb-3">Match & Chat</h4>
+                    <p class="text-body-secondary mb-0">Slide into their DMs securely. Schedule a session without leaking your actual phone number.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Match Simulator -->
+    <div class="glass-box p-5 text-center mb-5 border-primary" style="border-color: rgba(99, 102, 241, 0.3) !important; box-shadow: 0 0 40px rgba(99, 102, 241, 0.1);">
+        <h3 class="fw-bolder mb-2 text-gradient">Match Simulator</h3>
+        <p class="text-body-secondary mb-4">Search the AcademiConnect database in real-time.</p>
+        
+        <form class="row g-3 justify-content-center mx-auto" style="max-width: 700px;" onsubmit="event.preventDefault(); simulateMatch();">
+            <div class="col-md-5">
+                <input type="text" class="form-control form-glass rounded-pill px-4 py-2" id="simCourse" placeholder="Course Code (e.g., CS101)" value="CS101" required>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select form-glass rounded-pill px-4 py-2" id="simVibe">
+                    <option value="">Any Vibe</option>
+                    <option value="Quiet Library" selected>Quiet Library</option>
+                    <option value="Loud Cafe">Loud Cafe</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-neon w-100 rounded-pill py-2 fw-bold">Search</button>
+            </div>
+        </form>
+        
+        <div id="simResults" class="mt-4 text-start p-4 rounded-4" style="display: none; max-width: 700px; margin: 0 auto; background: rgba(0,0,0,0.2);">
+            <!-- Simulated matches will appear here -->
+        </div>
+    </div>
+
+    <!-- Creator's Note -->
+    <div class="glass-box p-5 mb-5 mx-auto" style="max-width: 900px; border-color: rgba(236, 72, 153, 0.3) !important; box-shadow: 0 0 30px rgba(236, 72, 153, 0.1);">
+        <div class="row align-items-center">
+            <div class="col-md-4 text-center mb-4 mb-md-0">
+                <div class="d-inline-block position-relative mb-3">
+                    <img src="https://api.dicebear.com/9.x/micah/svg?seed=Prisha" alt="Prisha Verma" class="rounded-circle border border-2 border-primary shadow-lg" width="120" height="120" style="background: rgba(255,255,255,0.1); padding: 5px;">
+                    <span class="position-absolute bottom-0 end-0 p-2 bg-success border border-light rounded-circle" title="Online"></span>
+                </div>
+                <h4 class="fw-bold text-white mb-1">Prisha Verma</h4>
+                <span class="badge bg-white bg-opacity-25 text-white px-3 py-2 mt-2 rounded-pill">VIT Bhopal University</span>
+            </div>
+            <div class="col-md-8 ps-md-5">
+                <h5 class="fw-bold text-gradient mb-3">Behind the App 🚀</h5>
+                <p class="text-body-secondary" style="line-height: 1.7; font-size: 1rem;">
+                    I created this platform after attending an amazing <strong>Google workshop by GeeksforGeeks</strong> where I learned about <strong>leveraging API and AI tools</strong> to build modern, functional websites. 
+                </p>
+                <p class="text-body-secondary mb-0" style="line-height: 1.7; font-size: 1rem;">
+                    AcademiConnect is my way of putting those skills to use! As a student at <strong>VIT Bhopal University</strong>, I wanted to build something that helps students find buddies, mentors, and resources easily.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Study Buddy Connect Modal -->
+<div class="modal fade" id="buddyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header glass-header p-4">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+                    <img src="https://api.dicebear.com/9.x/notionists/svg?seed=Buddy" alt="Buddy" width="30" height="30" class="rounded-circle bg-light">
+                    Chat with <span id="buddyModalName" class="text-gradient">Buddy</span>
+                </h5>
+                <div class="d-flex gap-3 align-items-center">
+                    <button class="btn btn-dark btn-sm rounded-circle" style="width: 36px; height: 36px; background: rgba(255,255,255,0.1); border:none;" onclick="alert('Initiating voice call...')">📞</button>
+                    <button class="btn btn-dark btn-sm rounded-circle" style="width: 36px; height: 36px; background: rgba(255,255,255,0.1); border:none;" onclick="alert('Initiating video call...')">📹</button>
+                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    <!-- Chat Box -->
+                    <div class="col-md-7 border-end border-secondary chat-area p-4 d-flex flex-column" style="height: 400px;">
+                        <div class="flex-grow-1 overflow-auto mb-3 pe-2 d-flex flex-column" id="buddyChatBox">
+                            <div class="text-center text-body-secondary small mb-3">Today</div>
+                            <div class="mb-3 p-3 rounded-4 text-white shadow-sm me-auto" style="background: rgba(255,255,255,0.1); max-width:85%; border-bottom-left-radius: 4px !important;">
+                                Hey! We matched for CS101. Want to hit up the library tomorrow?
+                            </div>
+                        </div>
+                        <div class="input-group mt-auto rounded-pill p-1" style="background: rgba(0,0,0,0.3);">
+                            <input type="text" class="form-control border-0 bg-transparent shadow-none text-white" id="buddyMessageInput" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') sendBuddyMessage()">
+                            <button class="btn btn-neon rounded-pill px-4" type="button" onclick="sendBuddyMessage()">Send</button>
+                        </div>
+                    </div>
+                    <!-- Scheduling -->
+                    <div class="col-md-5 p-4 schedule-area">
+                        <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                            📅 Schedule Session
+                        </h6>
+                        <p class="small text-body-secondary mb-4">Lock in a time and place.</p>
+                        
+                        <form action="/schedule" method="POST">
+                            <input type="hidden" name="course_code" value="CS101"> <!-- Placeholder for demo -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-body-secondary">Date</label>
+                                <input type="date" name="date" class="form-control form-glass rounded-3" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-body-secondary">Time</label>
+                                <input type="time" name="time" class="form-control form-glass rounded-3" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label small fw-bold text-body-secondary">Location / Meet Link</label>
+                                <input type="text" name="room_id" class="form-control form-glass rounded-3" placeholder="e.g. Discord Link" required>
+                            </div>
+                            <button type="submit" class="btn btn-neon w-100 btn-sm fw-bold rounded-pill">Send Invite</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const socket = io();
+    const currentUserName = "{{ user.name }}";
+    let currentRoom = null;
+
+    socket.on('receive_buddy_msg', function(data) {
+        const chatBox = document.getElementById('buddyChatBox');
+        const msgDiv = document.createElement('div');
+        
+        const isMe = data.sender === currentUserName;
+        msgDiv.className = `mb-3 p-3 rounded-4 text-white shadow-sm ${isMe ? 'ms-auto' : 'me-auto'}`;
+        
+        if (isMe) {
+            msgDiv.style.background = 'linear-gradient(135deg, #6366f1, #ec4899)';
+            msgDiv.style.borderBottomRightRadius = '4px !important';
+        } else {
+            msgDiv.style.background = 'rgba(255,255,255,0.1)';
+            msgDiv.style.borderBottomLeftRadius = '4px !important';
+        }
+        
+        msgDiv.innerText = data.message;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    async function simulateMatch() {
+        const course = document.getElementById('simCourse').value;
+        const vibe = document.getElementById('simVibe').value;
+        const resultsDiv = document.getElementById('simResults');
+        
+        resultsDiv.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-info" role="status"></div><p class="mt-2 text-body-secondary">Scanning vibes...</p></div>';
+        resultsDiv.style.display = 'block';
+
+        try {
+            const response = await fetch('/match', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ course_code: course, study_vibe: vibe })
+            });
+            const data = await response.json();
+            
+            setTimeout(() => {
+                let html = '';
+                
+                // Add AI Buddy Recommendation
+                html += `
+                <div class="p-3 mb-4 rounded-4 border border-info border-opacity-25" style="background: rgba(56, 189, 248, 0.05);">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span>🤖</span>
+                        <h6 class="fw-bold m-0 text-info">AI Buddy Recommendation</h6>
+                    </div>
+                    <p class="small text-body-secondary mb-0">Based on your course <strong>${course}</strong>, I've analyzed students with similar study energy. Here are your best matches!</p>
+                </div>`;
+
+                if (data.matches && data.matches.length > 0) {
+                    html += `<h5 class="text-info mb-3 fw-bold d-flex align-items-center gap-2">
+                        ✨ Found ${data.matches.length} Match(es)!
+                    </h5>
+                    <div class="list-group list-group-flush bg-transparent">`;
+                    
+                    data.matches.forEach(m => {
+                        html += `
+                        <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 px-0 border-bottom border-secondary text-white">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="https://api.dicebear.com/9.x/notionists/svg?seed=${m.name}" alt="avatar" width="45" height="45" class="rounded-circle bg-light">
+                                <div>
+                                    <strong class="fs-5">${m.name}</strong>
+                                    <span class="badge bg-secondary ms-2 bg-opacity-50">${m.matched_courses.join(', ')}</span>
+                                    <div class="text-body-secondary small mt-1">Vibe: ${m.study_vibe}</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-neon rounded-pill px-4" onclick="openBuddyModal('${m.name}')">Connect</button>
+                        </div>`;
+                    });
+                    html += '</div>';
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = `
+                    <div class="alert alert-dark border border-warning text-warning m-0 d-flex align-items-center gap-2" style="background: rgba(0,0,0,0.5);">
+                        ⚠️ No buddies found. Try changing your filters or check back later!
+                    </div>`;
+                }
+            }, 800);
+        } catch (e) {
+            resultsDiv.innerHTML = '<div class="alert alert-danger m-0">Error contacting the server.</div>';
+        }
+    }
+
+    function openBuddyModal(buddyName) {
+        document.getElementById('buddyModalName').innerText = buddyName;
+        document.querySelector('#buddyModal img[alt="Buddy"]').src = `https://api.dicebear.com/9.x/notionists/svg?seed=${buddyName}`;
+        
+        // Join a unique room for this pair (simplified: room named after buddy for demo)
+        if (currentRoom) {
+            // Optional: socket.emit('leave', {room: currentRoom});
+        }
+        currentRoom = buddyName; // In a real app, this would be a unique chat ID
+        socket.emit('join', {username: currentUserName, room: currentRoom});
+        
+        // Clear previous messages (optional for demo)
+        document.getElementById('buddyChatBox').innerHTML = '<div class="text-center text-body-secondary small mb-3">Today</div>';
+
+        var myModal = new bootstrap.Modal(document.getElementById('buddyModal'));
+        myModal.show();
+    }
+
+    function sendBuddyMessage() {
+        const input = document.getElementById('buddyMessageInput');
+        const text = input.value.trim();
+        if(!text || !currentRoom) return;
+        
+        socket.emit('send_buddy_msg', {
+            room: currentRoom,
+            message: text,
+            sender: currentUserName
+        });
+        
+        input.value = '';
+    }
+</script>
+{% endblock %}
