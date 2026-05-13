@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AcademiConnect - Study Buddy Finder</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts for Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0a0812; /* Midnight Violet */
+            --text-color: #f8fafc;
+            --card-bg: rgba(15, 12, 25, 0.7);
+            --card-border: rgba(139, 92, 246, 0.15); /* Purple Tint */
+            --accent: #a78bfa; /* Lilac Accent */
+            --accent-soft: rgba(167, 139, 250, 0.08);
+        }
+        [data-theme="light"] {
+            --bg-color: #f9f8ff; /* Soft Lilac Canvas */
+            --text-color: #2e1065;
+            --card-bg: #ffffff;
+            --card-border: #e9e7ff;
+            --accent: #6d28d9; /* Deep Purple Accent */
+            --accent-soft: rgba(109, 40, 217, 0.05);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin-bottom: 80px; 
+            min-height: 100vh;
+            position: relative;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* High Visibility Text Overrides */
+        [data-theme="dark"] .text-body-secondary, 
+        [data-theme="dark"] .text-muted {
+            color: #cbd5e1 !important; /* Brighter slate for dark mode */
+        }
+        [data-theme="dark"] .text-white-50 {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+        [data-theme="dark"] p, [data-theme="dark"] span, [data-theme="dark"] div, [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6 {
+            color: var(--text-color);
+        }
+        [data-theme="dark"] .text-info { color: #7dd3fc !important; }
+        [data-theme="dark"] .text-primary { color: #818cf8 !important; }
+        [data-theme="dark"] .text-success { color: #4ade80 !important; }
+
+        /* Aesthetic Dynamic Background Mesh */
+        .bg-mesh-1 {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, rgba(0,0,0,0) 70%);
+            top: -100px;
+            left: -200px;
+            z-index: -1;
+            animation: pulse 10s infinite alternate;
+        }
+        .bg-mesh-2 {
+            position: fixed;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(71,85,105,0.08) 0%, rgba(0,0,0,0) 70%);
+            bottom: -200px;
+            right: -200px;
+            z-index: -1;
+            animation: pulse 8s infinite alternate-reverse;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        .navbar {
+            background-color: rgba(15, 23, 42, 0.7) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        [data-theme="light"] .navbar {
+            background-color: rgba(255, 255, 255, 0.7) !important;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            color: var(--accent) !important;
+            font-size: 1.6rem;
+        }
+        .nav-link {
+            font-weight: 600;
+            color: var(--text-color) !important;
+            transition: color 0.3s ease;
+            opacity: 0.8;
+        }
+        .nav-link:hover {
+            opacity: 1;
+        }
+        
+        /* Floating Chat Widget Styles (Glassmorphism) */
+        .chat-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            --accent: #6366f1;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1050;
+            border: 1px solid var(--card-border);
+            transition: transform 0.3s ease;
+        }
+        .chat-header {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .chat-body {
+            height: 320px;
+            padding: 15px;
+            overflow-y: auto;
+            display: none; 
+            flex-direction: column;
+            gap: 12px;
+        }
+        .chat-footer {
+            padding: 15px;
+            background: var(--card-bg);
+            display: none; 
+        }
+        .message {
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 85%;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+        .bot-message {
+            background: var(--card-bg);
+            color: var(--text-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .user-message {
+            background: var(--accent);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-input {
+            background: var(--bg-color);
+            border: 1px solid var(--card-border);
+            color: var(--text-color);
+        }
+        .chat-input:focus {
+            background: var(--bg-color);
+            color: var(--text-color);
+            box-shadow: none;
+            border-color: var(--accent);
+        }
+        .btn-neon {
+            background: var(--accent);
+            color: white;
+            border: none;
+        }
+        
+        .glass-modal {
+            background: var(--bg-color) !important;
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border) !important;
+            color: var(--text-color);
+        }
+        .form-glass {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--card-border) !important;
+            color: var(--text-color) !important;
+        }
+    </style>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="bg-mesh-1"></div>
+    <div class="bg-mesh-2"></div>
+
+    <!-- Responsive Bootstrap Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-mortarboard-fill" viewBox="0 0 16 16" style="color: var(--accent);">
+                    <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5Z"/>
+                    <path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032Z"/>
+                </svg>
+                AcademiConnect
+            </a>
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon" style="filter: invert(0.5);"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-3">
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/library">Library</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/match">Find Buddies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/games">Games</a></li>
+                    
+                    <li class="nav-item">
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="toggleTheme()" id="themeBtn">🌙</button>
+                    </li>
+                    
+                    {% if user %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle fw-bold d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <img src="https://api.dicebear.com/9.x/notionists/svg?seed={{ user.name }}" alt="avatar" class="rounded-circle" width="30" height="30" style="background: var(--card-bg);">
+                            {{ user.name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg" style="background: var(--bg-color); border: 1px solid var(--card-border);">
+                            <li><span class="dropdown-item-text text-muted small">{{ user.college }} • {{ user.year }}</span></li>
+                            <li><hr class="dropdown-divider border-secondary"></li>
+                            <li><a class="dropdown-item text-danger fw-bold" href="/logout">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item"><a class="btn btn-neon rounded-pill px-4 btn-sm" href="/login">Join Now</a></li>
+                    {% endif %}
+
+                    <li class="nav-item ms-lg-2">
+                        <div class="px-3 py-1 rounded-pill d-flex align-items-center gap-2" style="background: var(--card-bg); border: 1px solid var(--card-border);">
+                            <div class="form-check form-switch m-0 d-flex align-items-center">
+                                <input class="form-check-input mt-0 me-2" type="checkbox" id="privateModeToggle">
+                                <label class="form-check-label small fw-bold mb-0" for="privateModeToggle" style="cursor:pointer;">Ghost Mode</label>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Block -->
+    <main>
+        {% block content %}{% endblock %}
+
+    </main>
+
+
+    <!-- Floating Chat Widget -->
+    <div class="chat-widget">
+        <div class="chat-header" id="chatHeader">
+            <div class="d-flex align-items-center gap-2">
+                <span style="font-size: 1.2rem;">✨</span> AcademiBot
+            </div>
+            <span id="chatToggleIcon" class="fs-4 lh-1">+</span>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="message bot-message">Hey! 👋 I'm AcademiBot. Need help finding a study match? Just say the word!</div>
+        </div>
+        <div class="chat-footer" id="chatFooter">
+            <div class="input-group">
+                <input type="text" id="chatInput" class="form-control chat-input" placeholder="Type a message...">
+                <button class="btn btn-neon px-3" id="chatSend">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chatbot & Privacy Logic -->
+    <script>
+        // Chat Widget Toggle
+        const chatHeader = document.getElementById('chatHeader');
+        const chatBody = document.getElementById('chatBody');
+        const chatFooter = document.getElementById('chatFooter');
+        const chatToggleIcon = document.getElementById('chatToggleIcon');
+        let chatOpen = false;
+
+        chatHeader.addEventListener('click', () => {
+            chatOpen = !chatOpen;
+            chatBody.style.display = chatOpen ? 'flex' : 'none';
+            chatFooter.style.display = chatOpen ? 'block' : 'none';
+            chatToggleIcon.innerText = chatOpen ? '−' : '+';
+        });
+
+        const chatInput = document.getElementById('chatInput');
+        const chatSend = document.getElementById('chatSend');
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
+            msgDiv.innerText = text;
+            chatBody.appendChild(msgDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function handleChat() {
+            const text = chatInput.value.trim().toLowerCase();
+            if (!text) return;
+            
+            appendMessage(chatInput.value, 'user');
+            chatInput.value = '';
+
+            setTimeout(() => {
+                if (text.includes('help') || text.includes('match')) {
+                    appendMessage("I got you! Just use the Match Simulator on the dashboard to find your study buddy.", 'bot');
+                } else {
+                    appendMessage("I'm still learning vibes! Try asking for 'help' or finding a 'match'.", 'bot');
+                }
+            }, 600);
+        }
+
+        chatSend.addEventListener('click', handleChat);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleChat();
+        });
+
+        // Private Mode Toggle
+        document.getElementById('privateModeToggle').addEventListener('change', function(e) {
+            if(e.target.checked) {
+                alert("👻 Ghost Mode Activated: Personal details are completely hidden. Vibes only.");
+            } else {
+                alert("🔓 Ghost Mode Disabled: Standard visibility restored.");
+            }
+        });
+
+        // Theme Toggle Logic
+        function toggleTheme() {
+            const body = document.documentElement;
+            const btn = document.getElementById('themeBtn');
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            body.setAttribute('data-theme', newTheme);
+            btn.innerText = newTheme === 'light' ? '☀️' : '🌙';
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeBtn').innerText = savedTheme === 'light' ? '☀️' : '🌙';
+    </script>
+</body>
+</html>
