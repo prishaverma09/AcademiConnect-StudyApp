@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h1 class="fw-bold mb-0">Shared <span class="text-gradient">Repository</span></h1>
+            <p class="text-muted">Upload and access notes, PDFs, and resources by course code.</p>
+        </div>
+        <div class="col-md-4 text-md-end align-self-center">
+            <button class="btn btn-neon rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                📤 Upload Resource
+            </button>
+        </div>
+    </div>
+
+    <!-- Course Filter & Search -->
+    <div class="dash-card p-4 mb-5 border-secondary border-opacity-25 shadow-sm">
+        <form class="row g-3" action="/repository" method="GET">
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-muted">Search Filename</label>
+                <input type="text" name="search" class="form-control form-glass rounded-pill px-4" placeholder="Search for files..." value="{{ search_query or '' }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-muted">Course Code</label>
+                <input type="text" name="course" class="form-control form-glass rounded-pill px-4" placeholder="e.g. CS101" value="{{ course_code or '' }}">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- File Grid -->
+    <div class="row g-4">
+        {% for file in files %}
+        <div class="col-md-6 col-lg-4">
+            <div class="dash-card p-4 d-flex align-items-center gap-3 transition-hover shadow-sm">
+                <div class="flex-shrink-0 rounded-4 p-3 border border-secondary border-opacity-25" style="background: var(--accent-soft);">
+                    {% if file.filename.endswith('.pdf') %}
+                    <h3 class="mb-0">📄</h3>
+                    {% elif file.filename.endswith(('.jpg', '.png', '.jpeg')) %}
+                    <h3 class="mb-0">🖼️</h3>
+                    {% else %}
+                    <h3 class="mb-0">📁</h3>
+                    {% endif %}
+                </div>
+                <div class="flex-grow-1 overflow-hidden">
+                    <h6 class="fw-bold mb-1 text-truncate" title="{{ file.filename }}">{{ file.filename }}</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-secondary rounded-pill small">{{ file.course_code }}</span>
+                        <small class="text-muted fw-bold">by {{ file.uploader.name }}</small>
+                    </div>
+                </div>
+                <a href="/download/{{ file.id }}" class="btn btn-outline-secondary btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                    ⬇️
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <h1 class="display-1">📁</h1>
+            <h3 class="fw-bold">No resources found.</h3>
+            <p class="text-muted">Be the first to share notes for this course!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-modal border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-bold m-0">Share a Resource</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="/upload" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Course Code</label>
+                        <input type="text" name="course_code" class="form-control form-glass" placeholder="e.g. CS101" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted">Select File (PDF, Image, etc.)</label>
+                        <input type="file" name="file" class="form-control form-glass" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold">Upload & Share</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
