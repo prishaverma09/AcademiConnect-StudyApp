@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h1 class="fw-bold mb-0">Find a <span class="text-gradient">Mentor</span></h1>
+            <p class="text-white-50">Connect with experts to accelerate your learning.</p>
+        </div>
+        <div class="col-md-4 text-md-end align-self-center">
+            <button class="btn btn-outline-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#beMentorModal">
+                Become a Mentor
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="glass-box p-4 mb-5 border-0">
+        <form class="row g-3" action="/mentor-search" method="GET">
+            <div class="col-md-5">
+                <label class="form-label small fw-bold text-white-50">Expertise / Skill</label>
+                <input type="text" name="skill" class="form-control form-glass rounded-pill px-4" placeholder="e.g. Python, Calculus, A* Search" value="{{ request.args.get('skill', '') }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-white-50">College / University</label>
+                <input type="text" name="college" class="form-control form-glass rounded-pill px-4" placeholder="Any College" value="{{ request.args.get('college', '') }}">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-neon w-100 rounded-pill py-2 fw-bold">Search Mentors</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Mentor Grid -->
+    <div class="row g-4">
+        {% for mentor in mentors %}
+        <div class="col-md-4">
+            <div class="glass-box p-4 text-center h-100 transition-hover">
+                <div class="position-relative d-inline-block mb-3">
+                    <img src="https://api.dicebear.com/9.x/notionists/svg?seed={{ mentor.name }}" class="rounded-circle bg-light" width="100" height="100">
+                    <span class="position-absolute bottom-0 end-0 badge bg-success border border-white rounded-circle p-2" title="Verified Mentor">
+                        <span class="visually-hidden">Verified</span>
+                    </span>
+                </div>
+                <h5 class="fw-bold mb-1">{{ mentor.name }}</h5>
+                <p class="text-white-50 small mb-3">{{ mentor.college }}</p>
+                
+                <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                    {% for skill in mentor.skills %}
+                    <span class="badge bg-primary bg-opacity-25 text-primary rounded-pill small">{{ skill.name }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center bg-black bg-opacity-20 p-3 rounded-4 mb-4">
+                    <div class="text-start">
+                        <small class="d-block text-white-50">Trust Score</small>
+                        <span class="fw-bold">⭐ {{ mentor.trust_score }}</span>
+                    </div>
+                    <div class="text-end">
+                        <small class="d-block text-white-50">Sessions</small>
+                        <span class="fw-bold">24+</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-neon w-100 rounded-pill fw-bold" onclick="openMentorModal('{{ mentor.name }}', '{{ mentor.college }}')">
+                    Connect with Mentor
+                </button>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <h1 class="display-1">🔎</h1>
+            <h3>No mentors found matching your criteria.</h3>
+            <p class="text-white-50">Try broadening your search or check back later!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Mentor Interaction Modal -->
+<div class="modal fade" id="mentorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header glass-header p-4">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+                    <img src="" id="mentorModalImg" alt="Mentor" width="30" height="30" class="rounded-circle bg-light">
+                    Mentorship with <span id="mentorModalName" class="text-gradient">Mentor</span>
+                </h5>
+                <div class="d-flex gap-3 align-items-center">
+                    <button class="btn btn-dark btn-sm rounded-circle" style="width: 36px; height: 36px; background: rgba(255,255,255,0.1); border:none;" onclick="alert('Starting voice session with mentor...')">📞</button>
+                    <button class="btn btn-dark btn-sm rounded-circle" style="width: 36px; height: 36px; background: rgba(255,255,255,0.1); border:none;" onclick="alert('Starting video consultation...')">📹</button>
+                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    <div class="col-md-7 border-end border-secondary p-4 d-flex flex-column" style="height: 400px; background: rgba(0,0,0,0.2);">
+                        <div class="flex-grow-1 overflow-auto mb-3 pe-2" id="mentorChatBox">
+                            <div class="text-center text-white-50 small mb-3">Conversation Started</div>
+                            <div class="mb-3 p-3 rounded-4 text-white shadow-sm me-auto" style="background: rgba(255,255,255,0.1); max-width:85%; border-bottom-left-radius: 4px !important;">
+                                Hello! I'm happy to help you with your academic goals. What topic should we focus on?
+                            </div>
+                        </div>
+                        <div class="input-group mt-auto rounded-pill p-1" style="background: rgba(0,0,0,0.3);">
+                            <input type="text" class="form-control border-0 bg-transparent shadow-none text-white px-4" placeholder="Message mentor...">
+                            <button class="btn btn-neon rounded-pill px-4" onclick="alert('Message sent to mentor!')">Send</button>
+                        </div>
+                    </div>
+                    <div class="col-md-5 p-4" style="background: rgba(56, 189, 248, 0.02);">
+                        <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                            📅 Schedule Mentorship
+                        </h6>
+                        <form action="/schedule" method="POST">
+                            <input type="hidden" name="room_id" id="mentorScheduleRoom">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-white-50">Topic</label>
+                                <input type="text" name="course_code" class="form-control form-glass rounded-3" placeholder="e.g. Exam Prep" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-white-50">Date</label>
+                                <input type="date" class="form-control form-glass rounded-3" required>
+                            </div>
+                            <button type="submit" class="btn btn-neon w-100 btn-sm fw-bold rounded-pill">Book Session</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openMentorModal(name, college) {
+        document.getElementById('mentorModalName').innerText = name;
+        document.getElementById('mentorModalImg').src = `https://api.dicebear.com/9.x/notionists/svg?seed=${name}`;
+        document.getElementById('mentorScheduleRoom').value = `MENTOR-${name}`;
+        
+        var myModal = new bootstrap.Modal(document.getElementById('mentorModal'));
+        myModal.show();
+    }
+</script>
+
+<!-- Become a Mentor Modal -->
+<div class="modal fade" id="beMentorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-modal border-0 rounded-4">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-bold m-0">Join the Mentor Squad</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="/become-mentor" method="POST">
+                    <p class="text-white-50 small mb-4">Share your expertise and help fellow students grow while boosting your own reputation score.</p>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Select Your Top Skills</label>
+                        <input type="text" name="skills" class="form-control form-glass" placeholder="e.g. Python, Data Structures (comma separated)" required>
+                    </div>
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" checked required>
+                            <label class="form-check-label small text-white-50">I agree to the Mentor Code of Conduct</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-neon w-100 rounded-pill py-2 fw-bold">Apply Now</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
